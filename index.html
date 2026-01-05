@@ -37,7 +37,7 @@
 <body>
 
 <div class="container">
-    <h2>🎵 Oficina Culinária Musical 🎵</h2>
+    <h2>Oficina Culinária Musical</h2>
     <p id="now-playing" style="font-size: 0.85rem; color: #888;">Selecione uma música</p>
     
     <audio id="audio" controls playsinline controlsList="nodownload" oncontextmenu="return false;"></audio>
@@ -83,9 +83,9 @@
         const first = document.querySelector('.playlist li');
         if (first) {
             // Apenas prepara a primeira música sem forçar o som (para não ser barrado pelo iOS)
-            audio.src = 'Oficina1.mp3';
+            audio.src = 'Oficina5.mp3';
             first.classList.add('active');
-            nowPlayingText.innerText = "Oficina 1 pronta";
+            nowPlayingText.innerText = "Oficina 5 pronta";
         }
     };
 </script>
