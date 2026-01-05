@@ -2,13 +2,33 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Meu Player Protegido</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Oficina Musical - Player Privado</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #121212; color: white; }
-        .player-container { text-align: center; background: #1e1e1e; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        audio { width: 300px; margin-top: 10px; }
-        /* Esconde o botão de download em navegadores baseados em Chrome */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0;
+            background: #0f0f0f; 
+            color: #ffffff; 
+        }
+        .player-container { 
+            text-align: center; 
+            background: #1a1a1a; 
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+            border: 1px solid #333;
+            width: 320px;
+        }
+        h2 { margin-bottom: 20px; color: #4CAF50; font-size: 1.2rem; }
+        audio { width: 100%; margin-top: 15px; border-radius: 8px; }
+
+        /* Proteção Visual: Esconde o botão de download no Chrome/Edge */
         audio::-webkit-media-controls-enclosure { overflow: hidden; }
         audio::-webkit-media-controls-panel { width: calc(100% + 30px); }
     </style>
@@ -16,21 +36,29 @@
 <body>
 
 <div class="player-container">
-    <h3>Minha Música Exclusiva</h3>
+    <h2>🎵 Oficina 1</h2>
+    <p style="font-size: 0.9rem; color: #888;">Streaming Protegido</p>
+    
     <audio id="audio" controls controlsList="nodownload" oncontextmenu="return false;"></audio>
+    
+    <p style="font-size: 0.7rem; margin-top: 20px; color: #555;">&copy; Todos os direitos reservados</p>
 </div>
 
 <script>
   var audio = document.getElementById('audio');
-  // Substitua pelo caminho do seu arquivo m3u8 no GitHub
-  var audioSrc = 'playlist.m3u8'; 
+  // Nome exato do arquivo que vi na sua imagem do GitHub
+  var audioSrc = 'Oficina1.m3u8'; 
 
   if (Hls.isSupported()) {
     var hls = new Hls();
     hls.loadSource(audioSrc);
     hls.attachMedia(audio);
-  } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-    // Para Safari (nativo)
+    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+      console.log("HLS carregado com sucesso!");
+    });
+  } 
+  // Suporte nativo para Safari (iOS/Mac)
+  else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
     audio.src = audioSrc;
   }
 </script>
