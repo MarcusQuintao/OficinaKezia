@@ -3,33 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oficina Musical - Streaming</title>
+    <title>Minha Oficina Musical - Playlist</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         body { 
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; 
+            font-family: 'Segoe UI', sans-serif; 
             display: flex; justify-content: center; align-items: center; 
             min-height: 100vh; margin: 0; background: #0f0f0f; color: #ffffff; 
         }
         .container { 
             text-align: center; background: #1a1a1a; padding: 30px; 
             border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.8); 
-            width: 90%; max-width: 350px; border: 1px solid #333;
+            width: 350px; border: 1px solid #333;
         }
-        h2 { color: #4CAF50; margin-bottom: 20px; font-weight: 500; }
+        h2 { color: #4CAF50; margin-bottom: 20px; }
+        
+        /* Estilo da Lista de Músicas */
         .playlist { list-style: none; padding: 0; margin-top: 20px; text-align: left; }
         .playlist li { 
-            padding: 14px; border-bottom: 1px solid #333; cursor: pointer; 
-            transition: 0.3s; display: flex; align-items: center; font-size: 0.95rem;
-            -webkit-tap-highlight-color: transparent; /* Remove brilho de toque no iOS */
+            padding: 12px; border-bottom: 1px solid #333; cursor: pointer; 
+            transition: 0.3s; display: flex; align-items: center;
         }
-        .playlist li:hover { background: #252525; }
+        .playlist li:hover { background: #252525; color: #4CAF50; }
         .playlist li.active { color: #4CAF50; font-weight: bold; background: #222; }
-        .playlist li::before { content: "▶"; margin-right: 12px; font-size: 0.7rem; opacity: 0.7; }
+        .playlist li::before { content: "▶"; margin-right: 10px; font-size: 0.8rem; }
+
+        audio { width: 100%; margin-top: 20px; }
         
-        audio { width: 100%; margin-top: 20px; outline: none; }
-        
-        /* Oculta botão de download no Chrome/Android */
+        /* Bloqueio visual de download */
         audio::-webkit-media-controls-enclosure { overflow: hidden; }
         audio::-webkit-media-controls-panel { width: calc(100% + 30px); }
     </style>
@@ -37,10 +38,10 @@
 <body>
 
 <div class="container">
-    <h2>🎵 Oficina Culinária Musical 🎵</h2>
-    <p id="now-playing" style="font-size: 0.85rem; color: #888;">Clique na música para ouvi-la</p>
+    <h2>🎵 Oficina Culinária Musical</h2>
+    <p id="now-playing" style="font-size: 0.9rem; color: #888;">Selecione uma música</p>
     
-    <audio id="audio" controls playsinline controlsList="nodownload" oncontextmenu="return false;"></audio>
+    <audio id="audio" controls controlsList="nodownload" oncontextmenu="return false;"></audio>
 
     <ul class="playlist" id="playlist">
         <li onclick="playSong('Oficina1.m3u8', 'Oficina 1', this)">Oficina 1</li>
@@ -57,39 +58,34 @@
     var nowPlayingText = document.getElementById('now-playing');
 
     function playSong(m3u8File, title, element) {
-        nowPlayingText.innerText = "Carregando: " + title;
+        // Atualiza interface
+        nowPlayingText.innerText = "Tocando: " + title;
         
+        // Remove destaque de outras músicas
         var items = document.querySelectorAll('.playlist li');
         items.forEach(item => item.classList.remove('active'));
         element.classList.add('active');
 
-        // PRIORIDADE 1: Suporte Nativo (iOS / Safari / macOS)
-        if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-            audio.src = m3u8File;
-            audio.addEventListener('canplay', function() {
-                nowPlayingText.innerText = "Tocando: " + title;
-                audio.play().catch(function(e) {
-                    console.log("Autoplay impedido pelo navegador");
-                });
-            }, { once: true });
-        } 
-        // PRIORIDADE 2: Biblioteca hls.js (Chrome / Android / Firefox / PC)
-        else if (Hls.isSupported()) {
-            hls.destroy();
+        // Carrega o HLS
+        if (Hls.isSupported()) {
+            hls.destroy(); // Limpa a instância anterior
             hls = new Hls();
             hls.loadSource(m3u8File);
             hls.attachMedia(audio);
             hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                nowPlayingText.innerText = "Tocando: " + title;
                 audio.play();
             });
+        } 
+        else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+            audio.src = m3u8File;
+            audio.play();
         }
     }
 
-    // Inicia a primeira música no PC/Android. No iOS pode exigir o clique inicial.
+    // Inicia com a primeira música automaticamente (opcional)
     window.onload = function() {
         const firstSong = document.querySelector('.playlist li');
-        if (firstSong) playSong('Oficina1.m3u8', 'Oficina 1', firstSong);
+        playSong('Oficina1.m3u8', 'Oficina 1', firstSong);
     };
 </script>
 
