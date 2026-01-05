@@ -3,64 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Oficina Musical - Player Privado</title>
+    <title>Minha Oficina Musical - Playlist</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0;
-            background: #0f0f0f; 
-            color: #ffffff; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0; background: #0f0f0f; color: #ffffff; 
         }
-        .player-container { 
-            text-align: center; 
-            background: #1a1a1a; 
-            padding: 40px; 
-            border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
-            border: 1px solid #333;
-            width: 320px;
+        .container { 
+            text-align: center; background: #1a1a1a; padding: 30px; 
+            border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.8); 
+            width: 350px; border: 1px solid #333;
         }
-        h2 { margin-bottom: 20px; color: #4CAF50; font-size: 1.2rem; }
-        audio { width: 100%; margin-top: 15px; border-radius: 8px; }
+        h2 { color: #4CAF50; margin-bottom: 20px; }
+        
+        /* Estilo da Lista de Músicas */
+        .playlist { list-style: none; padding: 0; margin-top: 20px; text-align: left; }
+        .playlist li { 
+            padding: 12px; border-bottom: 1px solid #333; cursor: pointer; 
+            transition: 0.3s; display: flex; align-items: center;
+        }
+        .playlist li:hover { background: #252525; color: #4CAF50; }
+        .playlist li.active { color: #4CAF50; font-weight: bold; background: #222; }
+        .playlist li::before { content: "▶"; margin-right: 10px; font-size: 0.8rem; }
 
-        /* Proteção Visual: Esconde o botão de download no Chrome/Edge */
+        audio { width: 100%; margin-top: 20px; }
+        
+        /* Bloqueio visual de download */
         audio::-webkit-media-controls-enclosure { overflow: hidden; }
         audio::-webkit-media-controls-panel { width: calc(100% + 30px); }
     </style>
 </head>
 <body>
 
-<div class="player-container">
-    <h2>🎵 Oficina 1</h2>
-    <p style="font-size: 0.9rem; color: #888;">Streaming Protegido</p>
+<div class="container">
+    <h2>🎵 Oficina Musical</h2>
+    <p id="now-playing" style="font-size: 0.9rem; color: #888;">Selecione uma música</p>
     
     <audio id="audio" controls controlsList="nodownload" oncontextmenu="return false;"></audio>
-    
-    <p style="font-size: 0.7rem; margin-top: 20px; color: #555;">&copy; Todos os direitos reservados</p>
+
+    <ul class="playlist" id="playlist">
+        <li onclick="playSong('Oficina1.m3u8', 'Oficina 1', this)">Oficina 1</li>
+        <li onclick="playSong('Oficina2.m3u8', 'Oficina 2', this)">Oficina 2</li>
+        <li onclick="playSong('Oficina3.m3u8', 'Oficina 3', this)">Oficina 3</li>
+        <li onclick="playSong('Oficina4.m3u8', 'Oficina 4', this)">Oficina 4</li>
+        <li onclick="playSong('Oficina5.m3u8', 'Oficina 5', this)">Oficina 5</li>
+    </ul>
 </div>
 
 <script>
-  var audio = document.getElementById('audio');
-  // Nome exato do arquivo que vi na sua imagem do GitHub
-  var audioSrc = 'Oficina1.m3u8'; 
-
-  if (Hls.isSupported()) {
+    var audio = document.getElementById('audio');
     var hls = new Hls();
-    hls.loadSource(audioSrc);
-    hls.attachMedia(audio);
-    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-      console.log("HLS carregado com sucesso!");
-    });
-  } 
-  // Suporte nativo para Safari (iOS/Mac)
-  else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-    audio.src = audioSrc;
-  }
+    var nowPlayingText = document.getElementById('now-playing');
+
+    function playSong(m3u8File, title, element) {
+        // Atualiza interface
+        nowPlayingText.innerText = "Tocando: " + title;
+        
+        // Remove destaque de outras músicas
+        var items = document.querySelectorAll('.playlist li');
+        items.forEach(item => item.classList.remove('active'));
+        element.classList.add('active');
+
+        // Carrega o HLS
+        if (Hls.isSupported()) {
+            hls.destroy(); // Limpa a instância anterior
+            hls = new Hls();
+            hls.loadSource(m3u8File);
+            hls.attachMedia(audio);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                audio.play();
+            });
+        } 
+        else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+            audio.src = m3u8File;
+            audio.play();
+        }
+    }
+
+    // Inicia com a primeira música automaticamente (opcional)
+    window.onload = function() {
+        const firstSong = document.querySelector('.playlist li');
+        playSong('Oficina1.m3u8', 'Oficina 1', firstSong);
+    };
 </script>
 
 </body>
