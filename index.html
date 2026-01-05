@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oficina Musical - Player</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>Oficina Musical - Player MP3</title>
     <style>
         body { 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; 
             display: flex; justify-content: center; align-items: center; 
             min-height: 100vh; margin: 0; background: #0f0f0f; color: #ffffff; 
         }
@@ -21,6 +20,7 @@
         .playlist li { 
             padding: 14px; border-bottom: 1px solid #333; cursor: pointer; 
             display: flex; align-items: center; font-size: 0.95rem;
+            transition: 0.2s;
             -webkit-tap-highlight-color: transparent;
         }
         .playlist li:hover { background: #252525; }
@@ -29,7 +29,7 @@
         
         audio { width: 100%; margin-top: 20px; }
         
-        /* Bloqueio de download Chrome/Android */
+        /* Bloqueio visual do botão de download (Chrome/Edge/Android) */
         audio::-webkit-media-controls-enclosure { overflow: hidden; }
         audio::-webkit-media-controls-panel { width: calc(100% + 30px); }
     </style>
@@ -43,55 +43,49 @@
     <audio id="audio" controls playsinline controlsList="nodownload" oncontextmenu="return false;"></audio>
 
     <ul class="playlist">
-        <li onclick="playSong('Oficina1.m3u8', 'Oficina 1', this)">Oficina 1</li>
-        <li onclick="playSong('Oficina2.m3u8', 'Oficina 2', this)">Oficina 2</li>
-        <li onclick="playSong('Oficina3.m3u8', 'Oficina 3', this)">Oficina 3</li>
-        <li onclick="playSong('Oficina4.m3u8', 'Oficina 4', this)">Oficina 4</li>
-        <li onclick="playSong('Oficina5.m3u8', 'Oficina 5', this)">Oficina 5</li>
+        <li onclick="playSong('Oficina1.mp3', 'Oficina 1', this)">Oficina 1</li>
+        <li onclick="playSong('Oficina2.mp3', 'Oficina 2', this)">Oficina 2</li>
+        <li onclick="playSong('Oficina3.mp3', 'Oficina 3', this)">Oficina 3</li>
+        <li onclick="playSong('Oficina4.mp3', 'Oficina 4', this)">Oficina 4</li>
+        <li onclick="playSong('Oficina5.mp3', 'Oficina 5', this)">Oficina 5</li>
     </ul>
 </div>
 
 <script>
     const audio = document.getElementById('audio');
     const nowPlayingText = document.getElementById('now-playing');
-    let hls = new Hls();
 
-    function playSong(m3u8File, title, element) {
+    function playSong(mp3File, title, element) {
         nowPlayingText.innerText = "Carregando: " + title;
         
-        // Estilo da lista
+        // Destacar música atual na lista
         document.querySelectorAll('.playlist li').forEach(item => item.classList.remove('active'));
         element.classList.add('active');
 
-        // LÓGICA DE CARREGAMENTO
-        if (Hls.isSupported()) {
-            // PC e Android (Chrome/Firefox)
-            hls.destroy();
-            hls = new Hls();
-            hls.loadSource(m3u8File);
-            hls.attachMedia(audio);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                audio.play().catch(() => console.log("Clique no play para iniciar"));
+        // Troca a fonte do áudio
+        audio.src = mp3File;
+        audio.load(); // Necessário para garantir a troca no iOS
+
+        // Tenta tocar
+        audio.play()
+            .then(() => {
                 nowPlayingText.innerText = "Tocando: " + title;
+            })
+            .catch(error => {
+                nowPlayingText.innerText = "Clique no Play para ouvir: " + title;
+                console.log("Autoplay bloqueado, aguardando clique.");
             });
-            hls.on(Hls.Events.ERROR, (event, data) => {
-                if (data.fatal) console.error("Erro HLS fatal:", data.type);
-            });
-        } 
-        else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
-            // iOS e Safari Nativo
-            audio.src = m3u8File;
-            audio.addEventListener('loadedmetadata', () => {
-                audio.play().catch(() => console.log("iOS barrou autoplay"));
-                nowPlayingText.innerText = "Tocando: " + title;
-            }, { once: true });
-        }
     }
 
-    // Tenta carregar a primeira, mas sem forçar o play para não bugar no mobile
+    // Opcional: Tenta carregar a primeira música ao abrir a página
     window.onload = () => {
         const first = document.querySelector('.playlist li');
-        if (first) playSong('Oficina1.m3u8', 'Oficina 1', first);
+        if (first) {
+            // Apenas prepara a primeira música sem forçar o som (para não ser barrado pelo iOS)
+            audio.src = 'Oficina1.mp3';
+            first.classList.add('active');
+            nowPlayingText.innerText = "Oficina 1 pronta";
+        }
     };
 </script>
 
