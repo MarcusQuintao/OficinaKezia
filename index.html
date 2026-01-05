@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Meu Player Protegido</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #121212; color: white; }
+        .player-container { text-align: center; background: #1e1e1e; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        audio { width: 300px; margin-top: 10px; }
+        /* Esconde o botão de download em navegadores baseados em Chrome */
+        audio::-webkit-media-controls-enclosure { overflow: hidden; }
+        audio::-webkit-media-controls-panel { width: calc(100% + 30px); }
+    </style>
+</head>
+<body>
+
+<div class="player-container">
+    <h3>Minha Música Exclusiva</h3>
+    <audio id="audio" controls controlsList="nodownload" oncontextmenu="return false;"></audio>
+</div>
+
+<script>
+  var audio = document.getElementById('audio');
+  // Substitua pelo caminho do seu arquivo m3u8 no GitHub
+  var audioSrc = 'playlist.m3u8'; 
+
+  if (Hls.isSupported()) {
+    var hls = new Hls();
+    hls.loadSource(audioSrc);
+    hls.attachMedia(audio);
+  } else if (audio.canPlayType('application/vnd.apple.mpegurl')) {
+    // Para Safari (nativo)
+    audio.src = audioSrc;
+  }
+</script>
+
+</body>
+</html>
